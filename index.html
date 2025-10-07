@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LED-Buzzer Project Documentation</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        // No custom theme colors in Tailwind config, we'll use CSS variables for theme switching
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        // Use the Inter font, but keep the monospaced font for the body as requested by the aesthetic
+                        'title': ['Inter', 'sans-serif'],
+                        'mono': ['ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', 'Liberation Mono', 'Courier New', 'monospace'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Define the default (Light) theme colors using CSS variables */
+        :root {
+            --bg-color: #ffffff;
+            --text-color: #000000;
+            --secondary-bg: #f5f5f5; /* Off-white for section backgrounds */
+            --border-color: #000000;
+            --code-text: #000000; /* Pure Black for code in light mode */
+            --highlight-color: #ef4444; /* Red for emphasis */
+        }
+
+        /* Define the Dark theme colors */
+        [data-theme="dark"] {
+            --bg-color: #000000;
+            --text-color: #ffffff;
+            --secondary-bg: #111111; /* Dark gray/black for section backgrounds */
+            --border-color: #ffffff;
+            --code-text: #ffffff; /* Pure White for code in dark mode */
+            --highlight-color: #f87171; /* Brighter red for emphasis */
+        }
+
+        /* Apply the clean, monospaced font to the entire body and enable smooth transition */
+        body {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Courier New', monospace;
+            text-transform: uppercase;
+            line-height: 1.6;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            /* Smooth color transition for a clean theme change */
+            transition: background-color 0.5s ease, color 0.5s ease;
+        }
+
+        /* Use variables for border colors */
+        .hr-separator {
+            border-top: 2px solid var(--border-color);
+        }
+        .code-block {
+            max-height: 400px;
+            overflow-y: auto;
+            border: 2px solid var(--border-color);
+            padding: 1.5rem;
+            line-height: 1.5;
+            font-size: 0.875rem;
+            margin-top: 0.5rem;
+            background-color: var(--secondary-bg); /* Use secondary BG for code block */
+            color: var(--code-text); /* Code text color (Now white in dark mode) */
+        }
+
+        /* Custom scrollbar using theme variables */
+        .code-block::-webkit-scrollbar { width: 8px; }
+        .code-block::-webkit-scrollbar-thumb {
+            background-color: var(--border-color);
+            border-radius: 0;
+        }
+        .code-block::-webkit-scrollbar-track {
+            background-color: var(--secondary-bg);
+        }
+
+        /* Responsive Iframe container with a strong border */
+        .video-container {
+            position: relative;
+            padding-bottom: 56.25%;
+            height: 0;
+            overflow: hidden;
+            max-width: 100%;
+            border: 4px solid var(--border-color);
+        }
+        .video-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Schematic and Learning container styling */
+        .component-box {
+            padding: 0.5rem;
+            border: 4px solid var(--border-color);
+            background-color: var(--secondary-bg);
+            transition: background-color 0.5s ease;
+        }
+        .text-default {
+            color: var(--text-color);
+        }
+        .bg-default-button {
+            background-color: var(--border-color);
+            color: var(--bg-color);
+        }
+        .border-default {
+            border-color: var(--border-color);
+        }
+        .highlight-text {
+            color: var(--highlight-color);
+        }
+    </style>
+</head>
+<body data-theme="dark" class="min-h-screen p-6 sm:p-12 md:p-16">
+
+    <!-- Main Content Container (Centered and Max Width) -->
+    <div class="max-w-5xl mx-auto space-y-16 sm:space-y-24">
+
+        <!-- Header and Introduction Section (Enhanced for responsiveness) -->
+        <header class="text-center py-8">
+            <h1 class="font-title text-5xl sm:text-7xl md:text-8xl font-extrabold mb-10 tracking-widest leading-none text-default">
+                LED-BUZZER
+            </h1>
+            <p class="text-base sm:text-lg leading-relaxed max-w-3xl mx-auto border-default border-t-2 border-b-2 py-5 px-2" style="color: var(--text-color); opacity: 0.7;">
+                THIS WEBSITE SERVES AS THE TECHNICAL DOCUMENTATION FOR THE LED-BUZZER PROJECT. IT SHOWCASES THE MICROCONTROLLER CODE, CIRCUIT DESIGN, AND FINAL EXECUTION. THE FOCUS IS ON CLEAN HARDWARE/SOFTWARE INTEGRATION AND EFFICIENT COMPONENT CONTROL.
+            </p>
+        </header>
+
+        <!-- Navigation Links and Theme Toggle -->
+        <nav class="flex flex-wrap justify-center items-center space-x-4 sm:space-x-10 text-xl font-bold">
+            <a href="#code" class="p-3 hover:opacity-70 underline underline-offset-4 transition duration-300" style="color: var(--text-color);">
+                CODE
+            </a>
+            <a href="#schematic" class="p-3 hover:opacity-70 underline underline-offset-4 transition duration-300" style="color: var(--text-color);">
+                SCHEMATIC
+            </a>
+            <a href="#video" class="p-3 hover:opacity-70 underline underline-offset-4 transition duration-300" style="color: var(--text-color);">
+                VIDEO
+            </a>
+            <a href="#learning" class="p-3 hover:opacity-70 underline underline-offset-4 transition duration-300" style="color: var(--text-color);">
+                LEARNING
+            </a>
+            <!-- THEME TOGGLE BUTTON -->
+            <button id="themeToggleBtn" onclick="toggleTheme()" class="p-3 text-sm font-bold border-2 border-default hover:bg-opacity-80 transition duration-300" style="color: var(--text-color); border-color: var(--border-color);">
+                DARK / LIGHT
+            </button>
+        </nav>
+
+        <!-- Horizontal Rule Separator -->
+        <hr class="hr-separator my-10">
+
+        <!-- CODE Section -->
+        <section id="code" class="p-2 sm:p-0">
+            <h2 class="text-3xl sm:text-4xl font-title font-extrabold tracking-widest mb-6 text-default">SOURCE CODE</h2>
+            <p class="text-gray-300 mb-6 text-center max-w-2xl mx-auto" style="color: var(--text-color); opacity: 0.7;">
+                THE CORE LOGIC, WRITTEN FOR ARDUINO, DEMONSTRATES BASIC DIGITAL OUTPUT CONTROL FOR THE LED AND BUZZER COMPONENTS.
+            </p>
+
+            <div class="relative">
+                <button
+                    id="copyCodeBtn"
+                    class="absolute top-0 right-0 px-3 py-1 text-xs font-semibold transition duration-300 z-10 bg-default-button hover:opacity-80"
+                    onclick="copyCode()">
+                    COPY CODE
+                </button>
+                <div id="copyMessage" class="absolute top-0 right-24 text-sm opacity-0 transition-opacity duration-300" style="color: var(--text-color);">COPIED!</div>
+
+                <pre class="code-block"><code class="language-cpp" id="projectCode">
+// LED-Buzzer Project Code (Example: Arduino)
+
+int buzzer = 8;
+void setup() { pinMode(buzzer, OUTPUT); }
+void loop() {
+  tone(buzzer, 2000); // 2000 Hz
+  delay(500);
+  noTone(buzzer);
+  delay(500);
+}
+                </code></pre>
+            </div>
+        </section>
+
+        <!-- Horizontal Rule Separator -->
+        <hr class="hr-separator my-10">
+
+        <!-- SCHEMATIC Section -->
+        <section id="schematic" class="p-2 sm:p-0">
+            <h2 class="text-3xl sm:text-4xl font-title font-extrabold tracking-widest mb-6 text-default">CIRCUIT SCHEMATIC</h2>
+            <p class="text-gray-300 mb-6 text-center max-w-2xl mx-auto" style="color: var(--text-color); opacity: 0.7;">
+                THE SCHEMATIC SHOWS THE BASIC WIRING, HIGHLIGHTING THE NEED FOR A CURRENT-LIMITING RESISTOR FOR THE LED. SCROLL TO VIEW THE ENTIRE SKETCH.
+            </p>
+            <!-- Scrollable container for the Schematic Image/Sketch -->
+            <div class="component-box overflow-auto max-h-[600px] w-full">
+                <!-- Image source updated to reference the uploaded file. -->
+                <img
+                    src="skecth.png"
+                    alt="Hand-drawn Circuit Schematic Sketch"
+                    class="w-auto h-auto min-w-full"
+                    onerror="this.onerror=null; this.src='https://placehold.co/800x600/111111/ffffff?text=CIRCUIT+SCHEMATIC+SKETCH+LOAD+FAILED'"
+                />
+            </div>
+            <ul class="list-none text-sm mt-8 text-gray-400 space-y-2 max-w-xl mx-auto">
+                <li class="border-b border-gray-800 pb-2" style="border-color: var(--border-color); opacity: 0.7;">
+                    <span class="font-bold text-default">LED Connection:</span> Digital Pin (e.g., D10) $\rightarrow$ Current Limiting Resistor ($\approx 220 \Omega$) $\rightarrow$ LED Anode $\rightarrow$ LED Cathode $\rightarrow$ GND.
+                </li>
+                <li class="border-b border-gray-800 pb-2" style="border-color: var(--border-color); opacity: 0.7;">
+                    <span class="font-bold text-default">Buzzer Connection:</span> Digital Pin (e.g., D9) $\rightarrow$ Buzzer (+) $\rightarrow$ Buzzer (-) $\rightarrow$ GND.
+                </li>
+            </ul>
+        </section>
+
+        <!-- Horizontal Rule Separator -->
+        <hr class="hr-separator my-10">
+
+        <!-- VIDEO Section -->
+        <section id="video" class="p-2 sm:p-0">
+            <h2 class="text-3xl sm:text-4xl font-title font-extrabold tracking-widest mb-6 text-default">EXECUTION VIDEO</h2>
+            <p class="text-gray-300 mb-6 text-center max-w-2xl mx-auto" style="color: var(--text-color); opacity: 0.7;">
+                THIS SECTION DEMONSTRATES THE LIVE FUNCTIONALITY OF THE LED FLASHING AND BUZZER SOUNDING ACCORDING TO THE CODE'S TIMING.
+            </p>
+            <div class="video-container">
+                <!-- REPLACE THIS YOUTUBE URL WITH YOUR OWN VIDEO LINK -->
+                <iframe
+                    src="video_placeholder.mp4"
+                    frameborder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowfullscreen
+                    title="Project Video Demonstration Placeholder"
+                    loading="lazy">
+                </iframe>
+            </div>
+            <p class="mt-6 text-center text-xs" style="color: var(--text-color); opacity: 0.7;">
+                THE FINAL WORKING PROTOTYPE.
+            </p>
+        </section>
+
+        <!-- Horizontal Rule Separator -->
+        <hr class="hr-separator my-10">
+
+        <!-- LEARNING Section (Integrated into the minimalist design) -->
+        <section id="learning" class="p-2 sm:p-0">
+            <h2 class="text-3xl sm:text-4xl font-title font-extrabold tracking-widest mb-6 text-default">KEY LEARNING OUTCOMES</h2>
+            <p class="text-gray-300 mb-10 text-center max-w-3xl mx-auto" style="color: var(--text-color); opacity: 0.7;">
+                THE FOLLOWING CONCEPTS WERE MASTERED DURING THE DEVELOPMENT AND PROTOTYPING OF THIS EMBEDDED SYSTEM.
+            </p>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+
+                <!-- Learning 1: Electronics Basics (Text cleaned, opacity removed) -->
+                <div class="component-box p-5 border-l-4 border-l-yellow-500 hover:shadow-lg transition duration-300">
+                    <h4 class="text-xl font-bold mb-2 highlight-text">LEARNING ELECTRONICS BASICS</h4>
+                    <p class="text-sm" style="color: var(--text-color);">
+                        MASTERING THE PRINCIPLES OF OHM'S LAW ($V = I \times R$), SERIES CIRCUITS, AND COMPONENT POLARITY. UNDERSTANDING THE NECESSITY OF CURRENT-LIMITING RESISTORS TO PROTECT THE LED.
+                    </p>
+                </div>
+
+                <!-- Learning 2: Control Theory (Text cleaned, opacity removed) -->
+                <div class="component-box p-5 border-l-4 border-l-red-500 hover:shadow-lg transition duration-300">
+                    <h4 class="text-xl font-bold mb-2 highlight-text">CONTROL THEORY</h4>
+                    <p class="text-sm" style="color: var(--text-color);">
+                        IMPLEMENTING SIMPLE OPEN-LOOP CONTROL BY DEFINING A CLEAR SEQUENCE OF STATES (ON/OFF). USING PRECISE `delay()` FUNCTIONS TO MANAGE THE TIME INTERVAL OF THE CONTROLLED OUTPUT.
+                    </p>
+                </div>
+
+                <!-- Learning 3: Hardware-Software Integration (Text cleaned, opacity removed) -->
+                <div class="component-box p-5 border-l-4 border-l-blue-500 hover:shadow-lg transition duration-300">
+                    <h4 class="text-xl font-bold mb-2 highlight-text">HARDWARE-SOFTWARE INTEGRATION</h4>
+                    <p class="text-sm" style="color: var(--text-color);">
+                        BRIDGING DIGITAL CODE AND PHYSICAL REALITY USING COMMANDS LIKE `digitalWrite()` TO TRANSLATE LOGICAL STATES (HIGH/LOW) INTO VOLTAGE SIGNALS THAT DRIVE THE HARDWARE.
+                    </p>
+                </div>
+
+                <!-- Learning 4: Basic Wiring System (Text cleaned, opacity removed) -->
+                <div class="component-box p-5 border-l-4 border-l-green-500 hover:shadow-lg transition duration-300">
+                    <h4 class="text-xl font-bold mb-2 highlight-text">BASIC WIRING SYSTEM</h4>
+                    <p class="text-sm" style="color: var(--text-color);">
+                        GAINING PROFICIENCY IN SAFE AND RELIABLE BREADBOARD WIRING. LEARNING TO MANAGE POWER RAILS (VCC AND GND) AND ENSURING STABLE, CLEAN CONNECTIONS FOR PROTOTYPING.
+                    </p>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- Horizontal Rule Separator -->
+        <hr class="hr-separator my-10">
+
+        <!-- Footer -->
+        <footer class="text-center py-6 text-xs" style="color: var(--text-color); opacity: 0.7;">
+            <p>&copy; 2025 LED-BUZZER PROJECT. DOCUMENTATION FOR ELECTRONICS AND EMBEDDED SYSTEMS.</p>
+        </footer>
+    </div>
+
+    <!-- JavaScript for Theme Toggle and Copy Code functionality -->
+    <script>
+        // Set the initial theme based on localStorage or default to 'dark'
+        function setupTheme() {
+            // Default to dark mode as it fits the initial aesthetic
+            const savedTheme = localStorage.getItem('theme') || 'dark';
+            document.body.setAttribute('data-theme', savedTheme);
+        }
+
+        // Toggle the theme between light and dark and save the preference
+        function toggleTheme() {
+            const currentTheme = document.body.getAttribute('data-theme');
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            document.body.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            document.getElementById('themeToggleBtn').innerText = newTheme.toUpperCase() + ' / ' + (currentTheme.toUpperCase());
+        }
+
+        // Run theme setup on load
+        window.onload = setupTheme;
+
+        // JavaScript for the Copy Code button functionality
+        function copyCode() {
+            const codeElement = document.getElementById('projectCode');
+            const codeToCopy = codeElement.innerText;
+            const copyMessage = document.getElementById('copyMessage');
+
+            // Use document.execCommand('copy') for better compatibility in iframe environments
+            try {
+                const textarea = document.createElement('textarea');
+                textarea.value = codeToCopy;
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+
+                // Show success message
+                copyMessage.classList.add('opacity-100');
+                setTimeout(() => {
+                    copyMessage.classList.remove('opacity-100');
+                }, 1500);
+
+            } catch (err) {
+                console.error('FAILED TO COPY TEXT: ', err);
+            }
+        }
+    </script>
+</body>
+</html>
